@@ -39,7 +39,7 @@ authRouter.post("/login", async (req, res) => {
     // adding jwtToken in response header
     res.cookie("token", token, { expires: new Date(Date.now() + 900000) });
 
-    res.send("Login Successfully");
+    res.send(user);
   } catch (error) {
     res.status(400).send("Error: " + error);
   }
