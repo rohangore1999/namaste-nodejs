@@ -1,47 +1,33 @@
 const express = require("express");
-const connectDB = require('./config/database')
-const User = require('./models/user')
+const connectDB = require("./config/database");
+const cookieParser = require("cookie-parser");
+
+// Routes
+const authRouter = require("./routes/auth");
+const profileRouter = require("./routes/profile");
+const requestRouter = require("./routes/request");
+const userRouter = require("./routes/user");
+
 const app = express();
 
-// middleware
-app.use(express.json()) // to parse the json body from request and converts to js object.
+// Middleware
+app.use(express.json()); // to parse the json body from request and converts to js object.
+app.use(cookieParser()); // to parse the cookie in JSON obj.
 
-app.post('/signup', async (req, res)=>{
-  // const userobj = {
-  //   firstName: "Rohan",
-  //   lastName: "Gore",
-  //   emailId: "rg@gmail.com",
-  //   password:"123",
-  // }
-
-  console.log(req.body)
-
-
-
-  // creating instance of new User model
-  const user = new User(req.body)
-
-  try {
-    await user.save()
-    
-    res.send("User Added Successfully")
-
-  } catch (error) {
-    res.status(400).send("Error saving the user: "+ error.message)
-  }
-  
-})
+// Routes
+app.use("/", authRouter);
+app.use("/", profileRouter);
+app.use("/", requestRouter);
+app.use("/", userRouter);
 
 connectDB()
   .then(() => {
-    console.log("DB connection Successful")
+    console.log("DB connection Successful");
 
     app.listen(7777, () => {
-    console.log("Server is listening");
-  });
+      console.log("Server is listening");
+    });
   })
   .catch(() => {
-    console.error("DB connection falied")
+    console.error("DB connection falied");
   });
-
-
