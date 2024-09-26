@@ -12,6 +12,7 @@ import { BASE_URL } from "../utils/constants";
 const Login = () => {
   const [emailId, setEmailId] = useState("");
   const [password, setPassword] = useState("");
+  const [errMsg, setErrMsg] = useState("")
 
   const dispatch = useDispatch();
 
@@ -34,7 +35,9 @@ const Login = () => {
       dispatch(addUser(res.data));
 
       navigate("/");
-    } catch (error) {}
+    } catch (error) {
+      setErrMsg(error?.response?.data)
+    }
   };
 
   return (
@@ -56,13 +59,15 @@ const Login = () => {
           <div className="space-y-2">
             <label>Password</label>
             <input
-              type="text"
+              type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="input w-full max-w-xs"
             />
           </div>
         </div>
+
+        {errMsg && <p className="text-red-500">{errMsg}</p>}
 
         <div className="card-actions justify-center mt-2">
           <button className="btn btn-primary" onClick={handleLogin}>

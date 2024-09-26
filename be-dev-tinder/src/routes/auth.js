@@ -11,7 +11,9 @@ const { validateSignupData } = require("../utils/validations");
 // Logout
 authRouter.post("/logout", async (req, res) => {
   // expiring the cookie from current time
-  res.cookie('token', null, { expires: new Date(Date.now()) }).send("Logout Successfully");
+  res
+    .cookie("token", null, { expires: new Date(Date.now()) })
+    .send("Logout Successfully");
 });
 
 // Login
@@ -37,7 +39,8 @@ authRouter.post("/login", async (req, res) => {
     const token = await user.getJwtToken(); // getJwtToken -> is the mongoose schema method
 
     // adding jwtToken in response header
-    res.cookie("token", token, { expires: new Date(Date.now() + 900000) });
+    const oneDay = 24 * 60 * 60 * 1000; // 1 day in milliseconds
+    res.cookie("token", token, { expires: new Date(Date.now() + oneDay) });
 
     res.send(user);
   } catch (error) {
