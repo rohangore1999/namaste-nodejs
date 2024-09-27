@@ -44,7 +44,7 @@ const Body = () => {
     <div>
       <Navbar />
 
-      <div className="h-auto">
+      <div className="h-[100vh]">
         {/* rendering child components */}
         <Outlet />
       </div>

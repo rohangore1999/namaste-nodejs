@@ -67,9 +67,17 @@ authRouter.post("/signup", async (req, res) => {
       password: passwordHashed,
     });
 
-    await user.save();
+    // getting the saved user
+    const savedUser = await user.save();
 
-    res.send("User Added Successfully");
+    // getting the token and storing it in cookie
+    const token = await user.getJwtToken(); // getJwtToken -> is the mongoose schema method
+
+    // adding jwtToken in response header
+    const oneDay = 24 * 60 * 60 * 1000; // 1 day in milliseconds
+    res.cookie("token", token, { expires: new Date(Date.now() + oneDay) });
+
+    res.json({ message: "User Added Successfully", data: savedUser });
   } catch (error) {
     res.status(400).send("Error saving the user: " + error.message);
   }

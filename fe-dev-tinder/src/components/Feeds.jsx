@@ -26,12 +26,13 @@ const Feeds = () => {
     getFeeds();
   }, []);
 
-  return (
-    feedData && (
-      <div className="flex justify-center mt-10">
-        <Cards data={feedData[0]} />
-      </div>
-    )
+  return feedData?.length ? (
+    <div className="flex justify-center mt-10">
+      {/* We just want to show one card and as we "interested | ignored" we are removing the user */}
+      <Cards data={feedData[0]} />
+    </div>
+  ) : (
+    <>No Pending Request!!!</>
   );
 };
 
