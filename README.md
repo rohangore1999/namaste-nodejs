@@ -46,4 +46,9 @@
         proxy_set_header Host $host;
         proxy_cache_bypass $http_upgrade;
     }
+
+    location / {
+        # Try to serve the request as a file, or fallback to index.html
+        try_files $uri $uri/ /index.html;
+    }
 ```
