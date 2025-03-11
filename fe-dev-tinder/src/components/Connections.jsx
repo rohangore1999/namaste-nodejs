@@ -23,18 +23,20 @@ const Connections = () => {
     getConnections();
   }, []);
 
-  return connectionsData && (
-    <div className="text-center my-10">
-      <h1 className="text-bold text-2xl">Connections</h1>
+  return (
+    connectionsData && (
+      <div className="text-center my-10">
+        <h1 className="text-bold text-2xl">Connections</h1>
 
-      {connectionsData.map((connection) => (
-        <div className="flex m-4 p-4 rounded-lg bg-base-300">
-          <div>
-            <h2>{connection.firstName + " " + connection.lastName}</h2>
+        {connectionsData.map((connection) => (
+          <div className="flex m-4 p-4 rounded-lg bg-base-300">
+            <div>
+              <h2>{connection.firstName + " " + connection.lastName}</h2>
+            </div>
           </div>
-        </div>
-      ))}
-    </div>
+        ))}
+      </div>
+    )
   );
 };
 
