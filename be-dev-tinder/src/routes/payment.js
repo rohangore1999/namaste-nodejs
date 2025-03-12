@@ -66,62 +66,48 @@ paymentRouter.post("/payment/create-order", userAuth, async (req, res) => {
 // ref: https://www.cashfree.com/docs/payments/online/webhooks/overview#webhook-signature-verification
 // https://www.cashfree.com/docs/api-reference/payments/latest/payments/webhooks
 // no need of userAuth middleware here because Cashfree will send the request.
-paymentRouter.post(
-  "/payment/webhook",
-  bodyParser.raw({ type: "application/json" }), // Change to specifically handle JSON
-  async (req, res) => {
-    try {
-      // Log the request headers for debugging
-      console.log("Webhook Headers:", req.headers);
+paymentRouter.post("/payment/webhook", async (req, res) => {
+  try {
+    // The raw body is now available as req.rawBody
+    console.log("rawBody in /webhook >>> ", req.rawBody);
 
-      // Get raw body as Buffer and convert to string
-      const rawBody = req.body;
-      const bodyString = rawBody.toString("utf8");
-      console.log("rawBody type:", typeof rawBody);
-      console.log("rawBody in /webhook >>> ", bodyString);
+    const signature = req.headers["x-webhook-signature"];
+    const timestamp = req.headers["x-webhook-timestamp"];
 
-      const signature = req.headers["x-webhook-signature"];
-      const timestamp = req.headers["x-webhook-timestamp"];
+    console.log("Webhook Headers:", {
+      signature,
+      timestamp,
+      contentType: req.headers["content-type"],
+    });
 
-      // Confirm we have the required headers
-      if (!signature || !timestamp) {
-        console.error("Missing required headers:", { signature, timestamp });
-        return res.status(400).send("Missing required headers");
-      }
+    // Log raw data for debugging
+    console.log("Raw data length:", req.rawBody ? req.rawBody.length : 0);
 
-      // Log the key pieces for verification
-      console.log("Verifying with:", {
-        signatureLength: signature ? signature.length : 0,
-        bodyLength: bodyString.length,
-        timestamp,
-      });
+    // Use the raw body string for signature verification
+    const isVerified = Cashfree.PGVerifyWebhookSignature(
+      signature,
+      req.rawBody, // Use the custom rawBody property
+      timestamp
+    );
 
-      // Try verification with both Buffer and string versions
-      const isVerified = Cashfree.PGVerifyWebhookSignature(
-        signature,
-        bodyString,
-        timestamp
-      );
+    console.log({ isVerified });
 
-      console.log({ isVerified });
-
-      if (!isVerified) {
-        return res.status(400).send("Signature verification failed");
-      }
-
-      // Parse the body string to JSON for processing
-      const parsedBody = JSON.parse(bodyString);
-      console.log("parsedBody >>> ", parsedBody);
-
-      // Process based on event type
-      // Add your webhook handling logic here
-
-      res.status(200).send("Webhook processed successfully");
-    } catch (err) {
-      console.error("Webhook error:", err);
-      res.status(500).send("Internal Server Error");
+    if (!isVerified) {
+      return res.status(400).send("Signature verification failed");
     }
+
+    // Parse the raw body to JSON for further processing
+    const parsedBody = JSON.parse(req.rawBody);
+    console.log("parsedBody >>> ", parsedBody);
+
+    // Process the webhook based on parsed data
+    // ...
+
+    res.status(200).send("Webhook processed successfully");
+  } catch (err) {
+    console.error("Webhook error:", err);
+    res.status(500).send("Internal Server Error");
   }
-);
+});
 
 module.exports = paymentRouter;

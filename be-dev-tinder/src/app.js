@@ -4,7 +4,7 @@ const cookieParser = require("cookie-parser");
 const cors = require("cors");
 
 // To use the .env file
-require('dotenv').config()
+require("dotenv").config();
 
 // Routes
 const authRouter = require("./routes/auth");
@@ -23,8 +23,31 @@ app.use(
     credentials: true,
   })
 ); // CORS handling
-app.use(express.json()); // to parse the json body from request and converts to js object.
+
 app.use(cookieParser()); // to parse the cookie in JSON obj.
+
+// to parse the json body from request and converts to js object.
+// For all routes EXCEPT the webhook route, parse JSON
+app.use((req, res, next) => {
+  if (req.originalUrl === "/payment/webhook") {
+    next();
+  } else {
+    express.json()(req, res, next);
+  }
+});
+
+// Create a raw body buffer for webhooks
+app.use("/payment/webhook", (req, res, next) => {
+  let data = "";
+  req.on("data", (chunk) => {
+    data += chunk.toString();
+  });
+
+  req.on("end", () => {
+    req.rawBody = data;
+    next();
+  });
+});
 
 // Routes
 app.use("/", authRouter);
