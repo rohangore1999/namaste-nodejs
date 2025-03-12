@@ -67,7 +67,7 @@ paymentRouter.post("/payment/create-order", userAuth, async (req, res) => {
 // https://www.cashfree.com/docs/api-reference/payments/latest/payments/webhooks
 // no need of userAuth middleware here because Cashfree will send the request.
 paymentRouter.post(
-  "/webhook",
+  "/payment/webhook",
   bodyParser.raw({ type: "application/json" }), // Change to specifically handle JSON
   async (req, res) => {
     try {
