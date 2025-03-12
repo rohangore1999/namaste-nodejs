@@ -68,29 +68,32 @@ paymentRouter.post("/payment/create-order", userAuth, async (req, res) => {
 // no need of userAuth middleware here because Cashfree will send the request.
 paymentRouter.post(
   "/payment/webhook",
-  bodyParser.raw({ type: "*/*" }), // Use raw parser for all content types
+  bodyParser.raw({ type: "*/*" }), // Ensure raw body parsing for all content types
   async (req, res) => {
     try {
-      console.log("req.body in /webhook >>> ", req.body); // req.body will be Buffer
-
-      const rawBody = req.body.toString(); // Convert Buffer to string
-      console.log("rawBody in /webhook >>> ", rawBody); // This is the raw body as a string
+      // Convert raw Buffer body to string
+      const rawBody = req.body.toString("utf8");
+      console.log("rawBody in /webhook >>> ", rawBody); // Check the raw body as a string
 
       const signature = req.headers["x-webhook-signature"];
       const timestamp = req.headers["x-webhook-timestamp"];
 
-      // Use rawBody for signature verification
+      // Use the raw body string for signature verification
       const isVerified = Cashfree.PGVerifyWebhookSignature(
         signature,
-        rawBody, // Pass the raw body string here
+        rawBody, // Pass the raw body string here for signature verification
         timestamp
       );
 
       console.log({ isVerified });
 
-      // Parse the raw body (JSON) into an object for further processing
+      if (!isVerified) {
+        return res.status(400).send("Signature verification failed");
+      }
+
+      // Parse the raw body to JSON for further processing
       const parsedBody = JSON.parse(rawBody);
-      console.log("parsedBody >>> ", parsedBody);
+      console.log("parsedBody >>> ", parsedBody); // Check if the parsed body is correct
 
       res.send("OK");
     } catch (err) {
