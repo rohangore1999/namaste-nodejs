@@ -10,6 +10,7 @@ const { userAuth } = require("../middlewares/auth");
 
 // Model
 const Payment = require("../models/payment");
+const User = require("../models/user");
 
 const MEMBERSHIP_TYPES = {
   gold: 100,
@@ -86,11 +87,49 @@ paymentRouter.post(
         timestamp
       );
 
-      console.log({ isVerified });
+      if (!isVerified) {
+        throw new Error("Webhook Signature Verification Failed");
+      }
+
+      console.log("Webhook Signature Verification Successful");
 
       // Parse the raw body (JSON) into an object for further processing
       const parsedBody = JSON.parse(rawBody);
       console.log("parsedBody >>> ", parsedBody);
+
+      // update the payment status in the database
+
+      // finding the payment by orderId(from Cashfree)
+      console.log("finding the payment by orderId(from Cashfree) ");
+
+      const payment = await Payment.findOne({
+        orderId: parsedBody?.data?.order?.order_id,
+      });
+      payment.orderStatus = parsedBody?.data?.payment?.payment_status;
+
+      console.log("payment >>> ", payment);
+
+      await payment.save();
+
+      // Updating the User db (as we've used ref: User in payment db)
+      console.log(
+        "Updating the User db (as we've used ref: User in payment db) "
+      );
+
+      const user = await User.findOne({
+        _id: data?.customer_details?.customer_id,
+      }); // as we have stored the userId while /create-order
+      user.isPayment = true;
+
+      console.log("user >>> ", user);
+
+      await user.save();
+
+      if (parsedBody.type === "PAYMENT_SUCCESS_WEBHOOK") {
+        console.log("Payment Successful !!");
+      } else {
+        console.log("Payment Failed !!");
+      }
 
       res.send("OK");
     } catch (err) {

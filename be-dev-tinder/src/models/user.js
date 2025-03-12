@@ -43,6 +43,10 @@ const userSchema = new mongoose.Schema(
     skills: {
       type: [String],
     },
+    isPayment: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );
