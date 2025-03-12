@@ -37,17 +37,17 @@ app.use((req, res, next) => {
 });
 
 // Create a raw body buffer for webhooks
-app.use("/payment/webhook", (req, res, next) => {
-  let data = "";
-  req.on("data", (chunk) => {
-    data += chunk.toString();
-  });
+// app.use("/payment/webhook", (req, res, next) => {
+//   let data = "";
+//   req.on("data", (chunk) => {
+//     data += chunk.toString();
+//   });
 
-  req.on("end", () => {
-    req.rawBody = data;
-    next();
-  });
-});
+//   req.on("end", () => {
+//     req.rawBody = data;
+//     next();
+//   });
+// });
 
 // Routes
 app.use("/", authRouter);

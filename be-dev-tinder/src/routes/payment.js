@@ -66,48 +66,38 @@ paymentRouter.post("/payment/create-order", userAuth, async (req, res) => {
 // ref: https://www.cashfree.com/docs/payments/online/webhooks/overview#webhook-signature-verification
 // https://www.cashfree.com/docs/api-reference/payments/latest/payments/webhooks
 // no need of userAuth middleware here because Cashfree will send the request.
-paymentRouter.post("/payment/webhook", async (req, res) => {
-  try {
-    // The raw body is now available as req.rawBody
-    console.log("rawBody in /webhook >>> ", req.rawBody);
+paymentRouter.post(
+  "/payment/webhook",
+  bodyParser.raw({ type: "*/*" }), // Use raw parser for all content types
+  async (req, res) => {
+    try {
+      console.log("req.body in /webhook >>> ", req.body); // req.body will be Buffer
 
-    const signature = req.headers["x-webhook-signature"];
-    const timestamp = req.headers["x-webhook-timestamp"];
+      const rawBody = req.body.toString(); // Convert Buffer to string
+      console.log("rawBody in /webhook >>> ", rawBody); // This is the raw body as a string
 
-    console.log("Webhook Headers:", {
-      signature,
-      timestamp,
-      contentType: req.headers["content-type"],
-    });
+      const signature = req.headers["x-webhook-signature"];
+      const timestamp = req.headers["x-webhook-timestamp"];
 
-    // Log raw data for debugging
-    console.log("Raw data length:", req.rawBody ? req.rawBody.length : 0);
+      // Use rawBody for signature verification
+      const isVerified = Cashfree.PGVerifyWebhookSignature(
+        signature,
+        rawBody, // Pass the raw body string here
+        timestamp
+      );
 
-    // Use the raw body string for signature verification
-    const isVerified = Cashfree.PGVerifyWebhookSignature(
-      signature,
-      req.rawBody, // Use the custom rawBody property
-      timestamp
-    );
+      console.log({ isVerified });
 
-    console.log({ isVerified });
+      // Parse the raw body (JSON) into an object for further processing
+      const parsedBody = JSON.parse(rawBody);
+      console.log("parsedBody >>> ", parsedBody);
 
-    if (!isVerified) {
-      return res.status(400).send("Signature verification failed");
+      res.send("OK");
+    } catch (err) {
+      console.error(err);
+      res.status(500).send("Internal Server Error");
     }
-
-    // Parse the raw body to JSON for further processing
-    const parsedBody = JSON.parse(req.rawBody);
-    console.log("parsedBody >>> ", parsedBody);
-
-    // Process the webhook based on parsed data
-    // ...
-
-    res.status(200).send("Webhook processed successfully");
-  } catch (err) {
-    console.error("Webhook error:", err);
-    res.status(500).send("Internal Server Error");
   }
-});
+);
 
 module.exports = paymentRouter;
