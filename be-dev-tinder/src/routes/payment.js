@@ -1,5 +1,6 @@
 const express = require("express");
 const paymentRouter = express.Router();
+const bodyParser = require("body-parser");
 
 // Utils
 const Cashfree = require("../utils/cashfree");
@@ -65,24 +66,33 @@ paymentRouter.post("/payment/create-order", userAuth, async (req, res) => {
 // ref: https://www.cashfree.com/docs/payments/online/webhooks/overview#webhook-signature-verification
 // https://www.cashfree.com/docs/api-reference/payments/latest/payments/webhooks
 // no need of userAuth middleware here because Cashfree will send the request.
-paymentRouter.post("/payment/webhook", async (req, res) => {
-  try {
-    console.log("req.rawBody in /webhook >>> ", req.rawBody)
+paymentRouter.post(
+  "/payment/webhook",
+  bodyParser.raw({ type: "*/*" }), // Use raw parser for all content types
+  async (req, res) => {
+    try {
+      console.log("req.rawBody in /webhook >>> ", req.body); // req.body will be Buffer
 
-    const isVerified = Cashfree.PGVerifyWebhookSignature(
-      req.headers["x-webhook-signature"],
-      req.rawBody,
-      req.headers["x-webhook-timestamp"]
-    );
-    console.log({ isVerified });
+      const signature = req.headers["x-webhook-signature"];
+      const rawBody = req.body.toString(); // Convert Buffer to string
+      const timestamp = req.headers["x-webhook-timestamp"];
 
-    console.log("req.body >>> ", JSON.parse(req.rawBody));
+      const isVerified = Cashfree.PGVerifyWebhookSignature(
+        signature,
+        rawBody,
+        timestamp
+      );
 
-    res.send("OK");
-  } catch (err) {
-    console.error(err);
-    throw new Error("Internal Server Error");
+      console.log({ isVerified });
+
+      console.log("req.body >>> ", JSON.parse(req.rawBody));
+
+      res.send("OK");
+    } catch (err) {
+      console.error(err);
+      throw new Error("Internal Server Error");
+    }
   }
-});
+);
 
 module.exports = paymentRouter;
