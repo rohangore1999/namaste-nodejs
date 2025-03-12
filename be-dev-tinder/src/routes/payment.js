@@ -67,6 +67,8 @@ paymentRouter.post("/payment/create-order", userAuth, async (req, res) => {
 // no need of userAuth middleware here because Cashfree will send the request.
 paymentRouter.post("/payment/webhook", async (req, res) => {
   try {
+    console.log("req.rawBody in /webhook >>> ", req.rawBody)
+
     const isVerified = Cashfree.PGVerifyWebhookSignature(
       req.headers["x-webhook-signature"],
       req.rawBody,
@@ -75,7 +77,12 @@ paymentRouter.post("/payment/webhook", async (req, res) => {
     console.log({ isVerified });
 
     console.log("req.body >>> ", JSON.parse(req.rawBody));
-  } catch (err) {}
+
+    res.send("OK");
+  } catch (err) {
+    console.error(err);
+    throw new Error("Internal Server Error");
+  }
 });
 
 module.exports = paymentRouter;
