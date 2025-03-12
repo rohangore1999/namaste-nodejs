@@ -117,7 +117,7 @@ paymentRouter.post(
       );
 
       const user = await User.findOne({
-        _id: data?.customer_details?.customer_id,
+        _id: parsedBody?.data?.customer_details?.customer_id,
       }); // as we have stored the userId while /create-order
       user.isPayment = true;
 
