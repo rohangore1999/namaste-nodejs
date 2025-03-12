@@ -67,21 +67,39 @@ paymentRouter.post("/payment/create-order", userAuth, async (req, res) => {
 // https://www.cashfree.com/docs/api-reference/payments/latest/payments/webhooks
 // no need of userAuth middleware here because Cashfree will send the request.
 paymentRouter.post(
-  "/payment/webhook",
-  bodyParser.raw({ type: "*/*" }), // Ensure raw body parsing for all content types
+  "/webhook",
+  bodyParser.raw({ type: "application/json" }), // Change to specifically handle JSON
   async (req, res) => {
     try {
-      // Convert raw Buffer body to string
-      const rawBody = req.body.toString("utf8");
-      console.log("rawBody in /webhook >>> ", rawBody); // Check the raw body as a string
+      // Log the request headers for debugging
+      console.log("Webhook Headers:", req.headers);
+
+      // Get raw body as Buffer and convert to string
+      const rawBody = req.body;
+      const bodyString = rawBody.toString("utf8");
+      console.log("rawBody type:", typeof rawBody);
+      console.log("rawBody in /webhook >>> ", bodyString);
 
       const signature = req.headers["x-webhook-signature"];
       const timestamp = req.headers["x-webhook-timestamp"];
 
-      // Use the raw body string for signature verification
+      // Confirm we have the required headers
+      if (!signature || !timestamp) {
+        console.error("Missing required headers:", { signature, timestamp });
+        return res.status(400).send("Missing required headers");
+      }
+
+      // Log the key pieces for verification
+      console.log("Verifying with:", {
+        signatureLength: signature ? signature.length : 0,
+        bodyLength: bodyString.length,
+        timestamp,
+      });
+
+      // Try verification with both Buffer and string versions
       const isVerified = Cashfree.PGVerifyWebhookSignature(
         signature,
-        rawBody, // Pass the raw body string here for signature verification
+        bodyString,
         timestamp
       );
 
@@ -91,13 +109,16 @@ paymentRouter.post(
         return res.status(400).send("Signature verification failed");
       }
 
-      // Parse the raw body to JSON for further processing
-      const parsedBody = JSON.parse(rawBody);
-      console.log("parsedBody >>> ", parsedBody); // Check if the parsed body is correct
+      // Parse the body string to JSON for processing
+      const parsedBody = JSON.parse(bodyString);
+      console.log("parsedBody >>> ", parsedBody);
 
-      res.send("OK");
+      // Process based on event type
+      // Add your webhook handling logic here
+
+      res.status(200).send("Webhook processed successfully");
     } catch (err) {
-      console.error(err);
+      console.error("Webhook error:", err);
       res.status(500).send("Internal Server Error");
     }
   }
