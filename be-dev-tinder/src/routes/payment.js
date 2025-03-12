@@ -72,26 +72,30 @@ paymentRouter.post(
   async (req, res) => {
     try {
       console.log("req.body in /webhook >>> ", req.body); // req.body will be Buffer
-      console.log("req.rawBody in /webhook >>> ", req.rawBody); // req.body will be Buffer
+
+      const rawBody = req.body.toString(); // Convert Buffer to string
+      console.log("rawBody in /webhook >>> ", rawBody); // This is the raw body as a string
 
       const signature = req.headers["x-webhook-signature"];
-      const rawBody = req.body.toString(); // Convert Buffer to string
       const timestamp = req.headers["x-webhook-timestamp"];
 
+      // Use rawBody for signature verification
       const isVerified = Cashfree.PGVerifyWebhookSignature(
         signature,
-        req.rawBody,
+        rawBody, // Pass the raw body string here
         timestamp
       );
 
       console.log({ isVerified });
 
-      console.log("req.body >>> ", JSON.parse(req.rawBody));
+      // Parse the raw body (JSON) into an object for further processing
+      const parsedBody = JSON.parse(rawBody);
+      console.log("parsedBody >>> ", parsedBody);
 
       res.send("OK");
     } catch (err) {
       console.error(err);
-      throw new Error("Internal Server Error");
+      res.status(500).send("Internal Server Error");
     }
   }
 );
