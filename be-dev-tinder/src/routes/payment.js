@@ -31,10 +31,9 @@ paymentRouter.post("/payment/create-order", userAuth, async (req, res) => {
         customer_email: emailId,
         customer_phone: "9999999999",
       },
-      // order_meta: {
-      //   return_url:
-      //     "https://www.cashfree.com/devstudio/preview/pg/web/checkout?order_id={order_id}",
-      // },
+      order_meta: {
+        return_url: "http://3.108.59.63/profile",
+      },
     };
 
     const order = await Cashfree.PGCreateOrder("2023-08-01", request);
@@ -118,7 +117,7 @@ paymentRouter.post(
 
       const user = await User.findOne({
         _id: parsedBody?.data?.customer_details?.customer_id,
-      }); // as we have stored the userId while /create-order 
+      }); // as we have stored the userId while /create-order
       user.isPayment = true;
 
       console.log("user >>> ", user);
