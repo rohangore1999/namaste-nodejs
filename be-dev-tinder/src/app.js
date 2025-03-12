@@ -27,7 +27,7 @@ app.use(
 app.use(cookieParser()); // to parse the cookie in JSON obj.
 
 // to parse the json body from request and converts to js object.
-// For all routes EXCEPT the webhook route, parse JSON
+// For all routes EXCEPT the webhook route (as we need rawBody), parse JSON
 app.use((req, res, next) => {
   if (req.originalUrl === "/payment/webhook") {
     next();
@@ -35,19 +35,6 @@ app.use((req, res, next) => {
     express.json()(req, res, next);
   }
 });
-
-// Create a raw body buffer for webhooks
-// app.use("/payment/webhook", (req, res, next) => {
-//   let data = "";
-//   req.on("data", (chunk) => {
-//     data += chunk.toString();
-//   });
-
-//   req.on("end", () => {
-//     req.rawBody = data;
-//     next();
-//   });
-// });
 
 // Routes
 app.use("/", authRouter);
