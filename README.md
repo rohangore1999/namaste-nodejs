@@ -19,6 +19,7 @@
     - config nginx -> `/etc/nginx/sites-available/default`
     - restart nginx -> `sudo systemctl restart nginx`
     - Modify the BASEURL in frontend project to "/api"
+    - to restart pm2 -> pm2 restart <id>
 
 
 # Ngxinx config (for Proxy Pass):

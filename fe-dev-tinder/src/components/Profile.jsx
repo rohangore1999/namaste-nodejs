@@ -20,6 +20,7 @@ const Profile = () => {
 
       // open cashfree dialog box on success of order response.
       // when the app will load, the Cashfree script will get load and Cashfree object will be preset in the window object.
+      // https://www.cashfree.com/docs/payments/online/web/redirect
       const cashfree = window.Cashfree({
         mode: "sandbox",
       });
@@ -29,7 +30,9 @@ const Profile = () => {
         redirectTarget: "_self",
       };
 
-      cashfree.checkout(checkoutOptions);
+      const cfResponse = await cashfree.checkout(checkoutOptions);
+
+      console.log({ cfResponse });
     } catch (err) {
       console.error(err);
     }
