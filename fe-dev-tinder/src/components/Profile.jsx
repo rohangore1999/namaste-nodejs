@@ -2,6 +2,7 @@ import axios from "axios";
 import { BASE_URL } from "../utils/constants";
 import EditProfile from "./EditProfile";
 import { useSelector } from "react-redux";
+import { useEffect } from "react";
 
 const Profile = () => {
   const userData = useSelector((store) => store.user);
@@ -30,24 +31,7 @@ const Profile = () => {
         redirectTarget: "_self",
       };
 
-      cashfree.checkout(checkoutOptions).then((result) => {
-        if (result.error) {
-          // This will be true when there is any error during the payment
-          console.log("There is some payment error, Check for Payment Status");
-          console.log(result.error);
-        }
-        if (result.redirect) {
-          // This will be true when the payment redirection page couldnt be opened in the same window
-          // This is an exceptional case only when the page is opened inside an inAppBrowser
-          // In this case the customer will be redirected to return url once payment is completed
-          console.log("Payment will be redirected");
-        }
-        if (result.paymentDetails) {
-          // This will be called whenever the payment is completed irrespective of transaction status
-          console.log("Payment has been completed, Check for Payment Status");
-          console.log(result.paymentDetails.paymentMessage);
-        }
-      });
+      cashfree.checkout(checkoutOptions);
     } catch (err) {
       console.error(err);
     }

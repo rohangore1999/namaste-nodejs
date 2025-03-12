@@ -138,4 +138,27 @@ paymentRouter.post(
   }
 );
 
+paymentRouter.get("/payment/status", userAuth, async (req, res) => {
+  // get the userID from userAuth middleware
+  // from get the orderId from Payment db based on userId
+
+  try {
+    const payment = await Payment.findOne({ userId: req?.user?._id });
+
+    console.log(payment)
+    console.log(req?.user)
+
+    const response = await Cashfree.PGFetchOrder("2023-08-01", payment.orderId);
+    console.log(response.data);
+    // .then((response) => {
+    //   console.log("Order fetched successfully:", response.data);
+    // })
+    // .catch((error) => {
+    //   console.error("Error:", error.response.data.message);
+    // });
+  } catch (err) {
+    console.error(err);
+  }
+});
+
 module.exports = paymentRouter;
