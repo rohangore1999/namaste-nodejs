@@ -79,7 +79,7 @@ paymentRouter.post(
 
       const isVerified = Cashfree.PGVerifyWebhookSignature(
         signature,
-        rawBody,
+        req.body,
         timestamp
       );
 
