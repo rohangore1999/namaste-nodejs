@@ -71,7 +71,8 @@ paymentRouter.post(
   bodyParser.raw({ type: "*/*" }), // Use raw parser for all content types
   async (req, res) => {
     try {
-      console.log("req.rawBody in /webhook >>> ", req.body); // req.body will be Buffer
+      console.log("req.body in /webhook >>> ", req.body); // req.body will be Buffer
+      console.log("req.rawBody in /webhook >>> ", req.rawBody); // req.body will be Buffer
 
       const signature = req.headers["x-webhook-signature"];
       const rawBody = req.body.toString(); // Convert Buffer to string
@@ -79,7 +80,7 @@ paymentRouter.post(
 
       const isVerified = Cashfree.PGVerifyWebhookSignature(
         signature,
-        req.body,
+        req.rawBody,
         timestamp
       );
 
