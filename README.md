@@ -52,3 +52,7 @@
         try_files $uri $uri/ /index.html;
     }
 ```
+
+
+# Payment Gateway HLD:
+![alt text](image.png)
