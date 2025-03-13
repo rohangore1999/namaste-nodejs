@@ -32,7 +32,7 @@ paymentRouter.post("/payment/create-order", userAuth, async (req, res) => {
         customer_phone: "9999999999",
       },
       order_meta: {
-        return_url: "http://3.108.59.63/profile",
+        return_url: "http://3.108.59.63/payment-status?orderId={order_id}",
       },
     };
 
@@ -142,22 +142,27 @@ paymentRouter.get("/payment/status", userAuth, async (req, res) => {
   // get the userID from userAuth middleware
   // from get the orderId from Payment db based on userId
 
+  // getting the orderid from query param
+  const orderId = req?.query?.orderId;
+
   try {
-    const payment = await Payment.findOne({ userId: req?.user?._id });
+    console.log("Query Param >>", req?.query);
+    console.log({ orderId });
 
-    console.log(payment)
-    console.log(req?.user)
+    const response = await Cashfree.PGFetchOrder("2023-08-01", orderId);
 
-    const response = await Cashfree.PGFetchOrder("2023-08-01", payment.orderId);
-    console.log(response.data);
+    console.log(response?.data);
     // .then((response) => {
     //   console.log("Order fetched successfully:", response.data);
     // })
     // .catch((error) => {
     //   console.error("Error:", error.response.data.message);
     // });
+
+    res.send(response?.data);
   } catch (err) {
     console.error(err);
+    res.status(500).send(err?.data?.message);
   }
 });
 

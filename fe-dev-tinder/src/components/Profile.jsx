@@ -1,8 +1,11 @@
 import axios from "axios";
-import { BASE_URL } from "../utils/constants";
-import EditProfile from "./EditProfile";
 import { useSelector } from "react-redux";
-import { useEffect } from "react";
+
+// Components
+import EditProfile from "./EditProfile";
+
+// Constants
+import { BASE_URL } from "../utils/constants";
 
 const Profile = () => {
   const userData = useSelector((store) => store.user);
@@ -36,6 +39,23 @@ const Profile = () => {
       console.error(err);
     }
   };
+
+  // useEffect(() => {
+  //   // checking if in queryParam order_id present
+  //   const urlParams = new URLSearchParams(window.location.search);
+  //   const myOrderId = urlParams.get("order-id");
+
+  //   if (!myOrderId) return;
+
+  //   // if present then fetch the user data
+  //   window.Cashfree.PGFetchOrder("2023-08-01", myOrderId)
+  //     .then((response) => {
+  //       console.log("Order fetched successfully:", response.data);
+  //     })
+  //     .catch((error) => {
+  //       console.error("Error:", error.response.data.message);
+  //     });
+  // }, []);
 
   return (
     <div>

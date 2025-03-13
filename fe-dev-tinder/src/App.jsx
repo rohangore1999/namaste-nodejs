@@ -8,6 +8,7 @@ import Feeds from "./components/Feeds";
 import Connections from "./components/Connections";
 import Profile from "./components/Profile";
 import Requests from "./components/Requests";
+import PaymentStatus from "./components/PaymentStatus";
 
 // Utils
 import appStore from "./utils/appStore";
@@ -23,6 +24,7 @@ function App() {
             <Route path="/profile" element={<Profile />} />
             <Route path="/connections" element={<Connections />} />
             <Route path="/requests" element={<Requests />} />
+            <Route path="/payment-status" element={<PaymentStatus />} />
             <Route path="/" element={<Feeds />} />
           </Route>
         </Routes>
