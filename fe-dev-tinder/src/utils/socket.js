@@ -1,7 +1,10 @@
 import io from "socket.io-client";
 
-// Constants
-import { BASE_URL } from "./constants";
-
 // Creating a socket connection with the server
-export const createSocketConnection = io(BASE_URL);
+export const createSocketConnection = () => {
+  const socket = io("http://localhost:7777", {
+    transports: ["websocket"],
+  });
+
+  return socket;
+};

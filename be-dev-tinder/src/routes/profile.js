@@ -11,8 +11,6 @@ const { validateReqBody } = require('../utils/validations');
 // View the user
 profileRouter.get('/profile/view', userAuth, async (req, res) => {
   try {
-    console.log('LoggedIN user is ' + req.user);
-
     res.send(req.user);
   } catch (error) {
     res.status(400).send('Something went wrong');

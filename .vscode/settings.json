@@ -1,0 +1,29 @@
+{
+  "editor.wordWrap": "on",
+  "editor.wordWrapColumn": 120,
+  "editor.wrappingIndent": "same",
+  "[javascript]": {
+    "editor.wordWrap": "on"
+  },
+  "[javascriptreact]": {
+    "editor.wordWrap": "on"
+  },
+  "[typescript]": {
+    "editor.wordWrap": "on"
+  },
+  "[typescriptreact]": {
+    "editor.wordWrap": "on"
+  },
+  "[json]": {
+    "editor.wordWrap": "on"
+  },
+  "[html]": {
+    "editor.wordWrap": "on"
+  },
+  "[css]": {
+    "editor.wordWrap": "on"
+  },
+  "[markdown]": {
+    "editor.wordWrap": "on"
+  }
+}

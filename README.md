@@ -55,12 +55,16 @@
 
 # Payment Gateway HLD:
 
-![alt text](image.png)
+![alt text](payment-gateway-architecture.png)
 
 # Socket.io:
 
-- low-latency, bidrectional and event-based
+![alt text](socket-architecture.png)
 
+- low-latency, bidrectional and event-based.
+- For two chat we create a roomId, So that the chats should not mix up and identical for both users
+- So that the roomId is consistent for both (target and current) users
+  image.png
 
 ## Prettier Setup Guide
 

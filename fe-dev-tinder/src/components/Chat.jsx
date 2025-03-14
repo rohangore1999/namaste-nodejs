@@ -1,35 +1,96 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { useSelector } from "react-redux";
+
+// Utils
+import { createSocketConnection } from "../utils/socket";
 
 const Chat = () => {
   const { targetUserId } = useParams();
+
+  const user = useSelector((store) => store.user);
+
   const [messages, setMessages] = useState([
-    { id: 1, sender: "receiver", text: "It's over Anakin," },
-    { id: 2, sender: "user", text: "You underestimate my power!" },
-    { id: 3, sender: "receiver", text: "Don't try it!" },
+    // { id: 1, sender: "receiver", text: "It's over Anakin," },
+    // { id: 2, sender: "user", text: "You underestimate my power!" },
   ]);
   const [newMessage, setNewMessage] = useState("");
+
+  const userId = user?._id;
 
   const handleSendMessage = (e) => {
     e.preventDefault();
 
     if (newMessage.trim() === "") return;
 
-    const message = {
-      id: messages.length + 1,
-      sender: "user",
-      text: newMessage,
-    };
+    // Add message to local state immediately for better UX
+    setMessages((prevMessages) => [
+      ...prevMessages,
+      { id: prevMessages.length + 1, sender: "user", text: newMessage },
+    ]);
 
-    setMessages([...messages, message]);
+    // establishing a socket connection
+    const socket = createSocketConnection();
+
+    socket.emit("sendMessage", {
+      firstName: user?.firstName,
+      userId,
+      targetUserId,
+      text: newMessage,
+    });
+
+    // Clear the input field
     setNewMessage("");
   };
+
+  useEffect(() => {
+    if (!userId) return;
+
+    // establishing a socket connection
+    const socket = createSocketConnection();
+
+    // emiting events
+    socket.emit("joinChat", { firstName: user?.firstName, userId: userId, targetUserId });
+
+    // listening to the receiveMessage event
+    socket.on(
+      "receiveMessage",
+      ({ firstName, userId: senderId, targetUserId: receiverId, text }) => {
+        console.log("Listening to the receiveMessage event...");
+        console.log({ firstName, senderId, receiverId, text });
+
+        // Only add the message if it's not from the current user
+        // As for both the roomId is same but the senderId will be different based on the user wo loggedIn
+        if (senderId !== userId) {
+          setMessages((prevMessages) => [
+            ...prevMessages,
+            {
+              id: prevMessages.length + 1,
+              sender: "receiver", // This is always a receiver message if it's not from the current user
+              text,
+            },
+          ]);
+        }
+      }
+    );
+
+    // on component unmount
+    return () => {
+      // disconnecting the socket
+      socket.disconnect();
+    };
+  }, [userId, targetUserId]);
+
+  console.log({ messages });
 
   return (
     <div className="flex justify-center h-screen bg-gray-900 p-5">
       <div className="w-full max-w-2xl bg-gray-800 rounded-lg shadow-xl flex flex-col h-[80vh] border border-gray-700">
         {/* Chat header */}
-        <div className="bg-gray-900 text-white p-4 rounded-t-lg flex items-center border-b border-gray-700">
+        <div
+          className="bg-gray-900 text-white p-4 rounded-t-lg flex items-center border-b
+         border-gray-700"
+        >
           <div className="w-10 h-10 rounded-full bg-purple-600 text-white flex items-center justify-center font-bold mr-3">
             {targetUserId?.charAt(0)?.toUpperCase() || "U"}
           </div>
