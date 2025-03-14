@@ -1,15 +1,15 @@
-const express = require("express");
+const express = require('express');
 const userRouter = express.Router();
 
 // Middleware
-const { userAuth } = require("../middlewares/auth");
+const { userAuth } = require('../middlewares/auth');
 
 // Models
-const ConnectionRequest = require("../models/connectionRequest");
-const User = require("../models/user");
+const ConnectionRequest = require('../models/connectionRequest');
+const User = require('../models/user');
 
 // Get all the pending requests
-userRouter.get("/user/request/pending", userAuth, async (req, res) => {
+userRouter.get('/user/request/pending', userAuth, async (req, res) => {
   try {
     const loggedInUser = req.user;
 
@@ -17,32 +17,33 @@ userRouter.get("/user/request/pending", userAuth, async (req, res) => {
 
     const pendingRequests = await ConnectionRequest.find({
       toUserId: loggedInUser._id,
-      status: "interested", // only need data of others who are interested in us
-    }).populate("fromUserId", ["firstName", "lastName"]);
+      status: 'interested', // only need data of others who are interested in us
+    }).populate('fromUserId', ['firstName', 'lastName']);
 
     res.json({
-      message: "Request Fetched Successfully",
+      message: 'Request Fetched Successfully',
       data: pendingRequests,
     });
   } catch (error) {
-    res.status(400).send("Error: " + error);
+    res.status(400).send('Error: ' + error);
   }
 });
 
 // Get all the accepted requests
-userRouter.get("/user/request/accepted", userAuth, async (req, res) => {
+userRouter.get('/user/request/accepted', userAuth, async (req, res) => {
   try {
     const loggedInUser = req.user;
 
     // find the loggedInUser Id in fromUserId or toUserId and status is accepted
     const acceptedConnections = await ConnectionRequest.find({
-      $or: [ // A accepts B or B accpets A, Both should be visible
-        { toUserId: loggedInUser._id, status: "accepted" },
-        { fromUserId: loggedInUser._id, status: "accepted" },
+      $or: [
+        // A accepts B or B accpets A, Both should be visible
+        { toUserId: loggedInUser._id, status: 'accepted' },
+        { fromUserId: loggedInUser._id, status: 'accepted' },
       ],
     })
-      .populate("fromUserId", ["firstName", "lastName"])
-      .populate("toUserId", ["firstName", "lastName"]);
+      .populate('fromUserId', ['firstName', 'lastName'])
+      .populate('toUserId', ['firstName', 'lastName']);
 
     // The loggedInUser can be either in fromUserId or toUserId
     const data = acceptedConnections.map((row) => {
@@ -55,16 +56,16 @@ userRouter.get("/user/request/accepted", userAuth, async (req, res) => {
     });
 
     res.json({
-      message: "Data fetched Successfully",
+      message: 'Data fetched Successfully',
       data,
     });
   } catch (error) {
-    res.status(400).send("Error: " + error);
+    res.status(400).send('Error: ' + error);
   }
 });
 
 // Get all the Feeds
-userRouter.get("/feeds", userAuth, async (req, res) => {
+userRouter.get('/feeds', userAuth, async (req, res) => {
   try {
     const loggedInUser = req.user;
     const page = req.query.page || 1;
@@ -78,11 +79,8 @@ userRouter.get("/feeds", userAuth, async (req, res) => {
 
     // find the users to whom we have sent/receive the request.
     const userToHideData = await ConnectionRequest.find({
-      $or: [
-        { fromUserId: loggedInUser._id }, 
-        { toUserId: loggedInUser._id }
-      ],
-    }).select(["fromUserId", "toUserId"]);
+      $or: [{ fromUserId: loggedInUser._id }, { toUserId: loggedInUser._id }],
+    }).select(['fromUserId', 'toUserId']);
 
     // As there can be duplicate ids .i.e one use can send req to mutiple people, so using New Set we will remove duplicates
     const hideUserSet = new Set();
@@ -99,13 +97,13 @@ userRouter.get("/feeds", userAuth, async (req, res) => {
         { _id: { $ne: loggedInUser._id } }, // "not equal" to loggedInUser id
       ],
     })
-      .select(["firstName", "lastName"])
+      .select(['firstName', 'lastName'])
       .skip(skip)
       .limit(limit); // it will skip the records and set the limit
 
     res.send(feedData);
   } catch (error) {
-    res.status(400).send("Error: " + error);
+    res.status(400).send('Error: ' + error);
   }
 });
 

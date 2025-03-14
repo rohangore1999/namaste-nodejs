@@ -11,12 +11,9 @@ const PaymentStatus = () => {
       const urlParams = new URLSearchParams(window.location.search);
       const myOrderId = urlParams.get("orderId");
 
-      const res = await axios.get(
-        BASE_URL + `/payment/status?orderId=${myOrderId}`,
-        {
-          withCredentials: true,
-        }
-      );
+      const res = await axios.get(BASE_URL + `/payment/status?orderId=${myOrderId}`, {
+        withCredentials: true,
+      });
 
       console.log(res?.data);
     } catch (error) {

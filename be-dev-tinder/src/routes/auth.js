@@ -1,23 +1,21 @@
-const express = require("express");
+const express = require('express');
 const authRouter = express.Router();
-const bcrypt = require("bcrypt");
+const bcrypt = require('bcrypt');
 
 // Models
-const User = require("../models/user");
+const User = require('../models/user');
 
 // Utils
-const { validateSignupData } = require("../utils/validations");
+const { validateSignupData } = require('../utils/validations');
 
 // Logout
-authRouter.post("/logout", async (req, res) => {
+authRouter.post('/logout', async (req, res) => {
   // expiring the cookie from current time
-  res
-    .cookie("token", null, { expires: new Date(Date.now()) })
-    .send("Logout Successfully");
+  res.cookie('token', null, { expires: new Date(Date.now()) }).send('Logout Successfully');
 });
 
 // Login
-authRouter.post("/login", async (req, res) => {
+authRouter.post('/login', async (req, res) => {
   try {
     const { emailId, password } = req.body;
 
@@ -25,13 +23,13 @@ authRouter.post("/login", async (req, res) => {
     const user = await User.findOne({ emailId });
 
     if (!user) {
-      throw new Error("Invalid Credentials");
+      throw new Error('Invalid Credentials');
     }
 
     const isPasswordValid = await user.validatePassword(password); // validatePassword  -> is the mongoose schema method
 
     if (!isPasswordValid) {
-      throw new Error("Invalid Credentials");
+      throw new Error('Invalid Credentials');
     }
 
     // Password is valid
@@ -40,16 +38,16 @@ authRouter.post("/login", async (req, res) => {
 
     // adding jwtToken in response header
     const oneDay = 24 * 60 * 60 * 1000; // 1 day in milliseconds
-    res.cookie("token", token, { expires: new Date(Date.now() + oneDay) });
+    res.cookie('token', token, { expires: new Date(Date.now() + oneDay) });
 
     res.send(user);
   } catch (error) {
-    res.status(400).send("Error: " + error);
+    res.status(400).send('Error: ' + error);
   }
 });
 
 // Signup - Add the user
-authRouter.post("/signup", async (req, res) => {
+authRouter.post('/signup', async (req, res) => {
   try {
     // Adding Validation
     validateSignupData(req);
@@ -75,11 +73,11 @@ authRouter.post("/signup", async (req, res) => {
 
     // adding jwtToken in response header
     const oneDay = 24 * 60 * 60 * 1000; // 1 day in milliseconds
-    res.cookie("token", token, { expires: new Date(Date.now() + oneDay) });
+    res.cookie('token', token, { expires: new Date(Date.now() + oneDay) });
 
-    res.json({ message: "User Added Successfully", data: savedUser });
+    res.json({ message: 'User Added Successfully', data: savedUser });
   } catch (error) {
-    res.status(400).send("Error saving the user: " + error.message);
+    res.status(400).send('Error saving the user: ' + error.message);
   }
 });
 

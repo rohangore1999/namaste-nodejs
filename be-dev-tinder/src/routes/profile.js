@@ -1,32 +1,32 @@
-const express = require("express");
+const express = require('express');
 const profileRouter = express.Router();
-const bcrypt = require("bcrypt");
+const bcrypt = require('bcrypt');
 
 // Middlewares
-const { userAuth } = require("../middlewares/auth");
+const { userAuth } = require('../middlewares/auth');
 
 // Utils
-const { validateReqBody } = require("../utils/validations");
+const { validateReqBody } = require('../utils/validations');
 
 // View the user
-profileRouter.get("/profile/view", userAuth, async (req, res) => {
+profileRouter.get('/profile/view', userAuth, async (req, res) => {
   try {
-    console.log("LoggedIN user is " + req.user);
+    console.log('LoggedIN user is ' + req.user);
 
     res.send(req.user);
   } catch (error) {
-    res.status(400).send("Something went wrong");
+    res.status(400).send('Something went wrong');
   }
 });
 
 // Edit profile
-profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
+profileRouter.patch('/profile/edit', userAuth, async (req, res) => {
   try {
     // validate the req body
     const isValidRequest = validateReqBody(req.body);
 
     if (!isValidRequest) {
-      throw new Error("Invalid Request");
+      throw new Error('Invalid Request');
     }
 
     // update the existing field and DB
@@ -39,20 +39,20 @@ profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
     // Update the DB
     await loggedInUser.save(); // as loggedInUser is the instance of the user which we have attached in auth (middleware)
 
-    res.json({ message: "Profile Updated Successfully", data: req.user });
+    res.json({ message: 'Profile Updated Successfully', data: req.user });
   } catch (err) {
-    res.status(400).send("Error: " + err);
+    res.status(400).send('Error: ' + err);
   }
 });
 
 // Update Password
-profileRouter.patch("/profile/password", userAuth, async (req, res) => {
+profileRouter.patch('/profile/password', userAuth, async (req, res) => {
   try {
     // validate the req body
-    const isValidReqBody = Object.keys(req.body).includes("password");
+    const isValidReqBody = Object.keys(req.body).includes('password');
 
     if (!isValidReqBody) {
-      throw new Error("Invalid request body");
+      throw new Error('Invalid request body');
     }
 
     const loggedInUser = req.user;
@@ -61,12 +61,12 @@ profileRouter.patch("/profile/password", userAuth, async (req, res) => {
     const encryptedNewPassword = await bcrypt.hash(req.body.password, 10);
     loggedInUser.password = encryptedNewPassword;
 
-    res.json({ message: "Password updated Successfully" });
+    res.json({ message: 'Password updated Successfully' });
 
     // update the DB
     await loggedInUser.save();
   } catch (err) {
-    res.status(400).send("Error: " + err);
+    res.status(400).send('Error: ' + err);
   }
 });
 

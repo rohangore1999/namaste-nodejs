@@ -6,13 +6,13 @@ const requestSlice = createSlice({
   reducers: {
     addRequest: (state, action) => action.payload,
     removeRequest: (state, action) => {
-      console.log({state})
-      console.log("action.payload >>", action.payload)
+      console.log({ state });
+      console.log("action.payload >>", action.payload);
       // state will contain the current state (addRequest data), from that we are removing the accepted/rejected id
-      const newArr = state.filter(request => request._id !== action.payload)
+      const newArr = state.filter((request) => request._id !== action.payload);
 
-      return newArr
-    }
+      return newArr;
+    },
   },
 });
 

@@ -26,9 +26,9 @@ const Requests = () => {
         { withCredentials: true }
       );
 
-      dispatch(removeRequest(requestId))
+      dispatch(removeRequest(requestId));
     } catch (error) {
-      console.error(error)
+      console.error(error);
     }
   };
 
@@ -43,9 +43,7 @@ const Requests = () => {
       {requestData.map((request) => (
         <div className="flex m-4 p-4 rounded-lg bg-base-300 justify-between">
           <div>
-            <h2>
-              {request.fromUserId.firstName + " " + request.fromUserId.lastName}
-            </h2>
+            <h2>{request.fromUserId.firstName + " " + request.fromUserId.lastName}</h2>
           </div>
 
           <div className="flex gap-2">

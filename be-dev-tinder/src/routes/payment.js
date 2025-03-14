@@ -1,42 +1,42 @@
-const express = require("express");
+const express = require('express');
 const paymentRouter = express.Router();
-const bodyParser = require("body-parser");
+const bodyParser = require('body-parser');
 
 // Utils
-const Cashfree = require("../utils/cashfree");
+const Cashfree = require('../utils/cashfree');
 
 // Middleware
-const { userAuth } = require("../middlewares/auth");
+const { userAuth } = require('../middlewares/auth');
 
 // Model
-const Payment = require("../models/payment");
-const User = require("../models/user");
+const Payment = require('../models/payment');
+const User = require('../models/user');
 
 const MEMBERSHIP_TYPES = {
   gold: 100,
   silver: 50,
 };
 
-paymentRouter.post("/payment/create-order", userAuth, async (req, res) => {
+paymentRouter.post('/payment/create-order', userAuth, async (req, res) => {
   try {
     const { firstName, lastName, emailId } = req.user;
     const { membershipType } = req.body;
 
     const request = {
       order_amount: MEMBERSHIP_TYPES[membershipType],
-      order_currency: "INR",
+      order_currency: 'INR',
       customer_details: {
         customer_id: req?.user?._id,
-        customer_name: firstName + " " + lastName,
+        customer_name: firstName + ' ' + lastName,
         customer_email: emailId,
-        customer_phone: "9999999999",
+        customer_phone: '9999999999',
       },
       order_meta: {
-        return_url: "http://3.108.59.63/payment-status?orderId={order_id}",
+        return_url: 'http://3.108.59.63/payment-status?orderId={order_id}',
       },
     };
 
-    const order = await Cashfree.PGCreateOrder("2023-08-01", request);
+    const order = await Cashfree.PGCreateOrder('2023-08-01', request);
 
     console.log(req.user);
 
@@ -58,7 +58,7 @@ paymentRouter.post("/payment/create-order", userAuth, async (req, res) => {
     res.json(order.data);
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });
 
@@ -67,17 +67,17 @@ paymentRouter.post("/payment/create-order", userAuth, async (req, res) => {
 // https://www.cashfree.com/docs/api-reference/payments/latest/payments/webhooks
 // no need of userAuth middleware here because Cashfree will send the request.
 paymentRouter.post(
-  "/payment/webhook",
-  bodyParser.raw({ type: "*/*" }), // Use raw parser for all content types
+  '/payment/webhook',
+  bodyParser.raw({ type: '*/*' }), // Use raw parser for all content types
   async (req, res) => {
     try {
-      console.log("req.body in /webhook >>> ", req.body); // req.body will be Buffer
+      console.log('req.body in /webhook >>> ', req.body); // req.body will be Buffer
 
       const rawBody = req.body.toString(); // Convert Buffer to string
-      console.log("rawBody in /webhook >>> ", rawBody); // This is the raw body as a string
+      console.log('rawBody in /webhook >>> ', rawBody); // This is the raw body as a string
 
-      const signature = req.headers["x-webhook-signature"];
-      const timestamp = req.headers["x-webhook-timestamp"];
+      const signature = req.headers['x-webhook-signature'];
+      const timestamp = req.headers['x-webhook-timestamp'];
 
       // Use rawBody for signature verification
       const isVerified = Cashfree.PGVerifyWebhookSignature(
@@ -87,58 +87,56 @@ paymentRouter.post(
       );
 
       if (!isVerified) {
-        throw new Error("Webhook Signature Verification Failed");
+        throw new Error('Webhook Signature Verification Failed');
       }
 
-      console.log("Webhook Signature Verification Successful");
+      console.log('Webhook Signature Verification Successful');
 
       // Parse the raw body (JSON) into an object for further processing
       const parsedBody = JSON.parse(rawBody);
-      console.log("parsedBody >>> ", parsedBody);
+      console.log('parsedBody >>> ', parsedBody);
 
       // update the payment status in the database
 
       // finding the payment by orderId(from Cashfree)
-      console.log("finding the payment by orderId(from Cashfree) ");
+      console.log('finding the payment by orderId(from Cashfree) ');
 
       const payment = await Payment.findOne({
         orderId: parsedBody?.data?.order?.order_id,
       });
       payment.orderStatus = parsedBody?.data?.payment?.payment_status;
 
-      console.log("payment >>> ", payment);
+      console.log('payment >>> ', payment);
 
       await payment.save();
 
       // Updating the User db (as we've used ref: User in payment db)
-      console.log(
-        "Updating the User db (as we've used ref: User in payment db) "
-      );
+      console.log("Updating the User db (as we've used ref: User in payment db) ");
 
       const user = await User.findOne({
         _id: parsedBody?.data?.customer_details?.customer_id,
       }); // as we have stored the userId while /create-order
       user.isPayment = true;
 
-      console.log("user >>> ", user);
+      console.log('user >>> ', user);
 
       await user.save();
 
-      if (parsedBody.type === "PAYMENT_SUCCESS_WEBHOOK") {
-        console.log("Payment Successful !!");
+      if (parsedBody.type === 'PAYMENT_SUCCESS_WEBHOOK') {
+        console.log('Payment Successful !!');
       } else {
-        console.log("Payment Failed !!");
+        console.log('Payment Failed !!');
       }
 
-      res.send("OK");
+      res.send('OK');
     } catch (err) {
       console.error(err);
-      res.status(500).send("Internal Server Error");
+      res.status(500).send('Internal Server Error');
     }
   }
 );
 
-paymentRouter.get("/payment/status", userAuth, async (req, res) => {
+paymentRouter.get('/payment/status', userAuth, async (req, res) => {
   // get the userID from userAuth middleware
   // from get the orderId from Payment db based on userId
 
@@ -146,10 +144,10 @@ paymentRouter.get("/payment/status", userAuth, async (req, res) => {
   const orderId = req?.query?.orderId;
 
   try {
-    console.log("Query Param >>", req?.query);
+    console.log('Query Param >>', req?.query);
     console.log({ orderId });
 
-    const response = await Cashfree.PGFetchOrder("2023-08-01", orderId);
+    const response = await Cashfree.PGFetchOrder('2023-08-01', orderId);
 
     console.log(response?.data);
     // .then((response) => {

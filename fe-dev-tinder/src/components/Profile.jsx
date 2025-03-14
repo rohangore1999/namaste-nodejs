@@ -16,11 +16,9 @@ const Profile = () => {
     };
 
     try {
-      const orderResponse = await axios.post(
-        BASE_URL + "/payment/create-order",
-        details,
-        { withCredentials: true }
-      );
+      const orderResponse = await axios.post(BASE_URL + "/payment/create-order", details, {
+        withCredentials: true,
+      });
 
       // open cashfree dialog box on success of order response.
       // when the app will load, the Cashfree script will get load and Cashfree object will be preset in the window object.
@@ -61,10 +59,7 @@ const Profile = () => {
     <div>
       {userData && <EditProfile data={userData} />}
 
-      <button
-        className="btn btn-primary bg-red-500"
-        onClick={() => hanldePayNow()}
-      >
+      <button className="btn btn-primary bg-red-500" onClick={() => hanldePayNow()}>
         Pay Now
       </button>
     </div>

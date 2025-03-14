@@ -51,9 +51,9 @@ const Login = () => {
         { withCredentials: true }
       );
 
-      dispatch(addUser(res.data.data))
+      dispatch(addUser(res.data.data));
 
-      navigate('/profile')
+      navigate("/profile");
     } catch (error) {
       console.error(error);
     }
@@ -62,9 +62,7 @@ const Login = () => {
   return (
     <div className="mx-auto mt-24 card bg-base-300 w-96 shadow-xl">
       <div className="card-body">
-        <h2 className="card-title mx-auto">
-          {isLoginPage ? "Login" : "Sign Up"}
-        </h2>
+        <h2 className="card-title mx-auto">{isLoginPage ? "Login" : "Sign Up"}</h2>
 
         {!isLoginPage && (
           <>
@@ -119,22 +117,24 @@ const Login = () => {
         {errMsg && <p className="text-red-500">{errMsg}</p>}
 
         <div className="card-actions justify-center mt-2">
-          <button
-            className="btn btn-primary"
-            onClick={isLoginPage ? handleLogin : handleSignUp}
-          >
+          <button className="btn btn-primary" onClick={isLoginPage ? handleLogin : handleSignUp}>
             {isLoginPage ? "Login" : "Sign Up"}
           </button>
         </div>
 
         {isLoginPage ? (
           <p>
-            New User? <span className="cursor-pointer" onClick={() => setIsLoginPage(false)}>Sign Up</span>
+            New User?{" "}
+            <span className="cursor-pointer" onClick={() => setIsLoginPage(false)}>
+              Sign Up
+            </span>
           </p>
         ) : (
           <p>
             Already User?{" "}
-            <span className="cursor-pointer" onClick={() => setIsLoginPage(true)}>Login Up</span>
+            <span className="cursor-pointer" onClick={() => setIsLoginPage(true)}>
+              Login Up
+            </span>
           </p>
         )}
       </div>
