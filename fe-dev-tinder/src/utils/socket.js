@@ -1,10 +1,15 @@
 import io from "socket.io-client";
 
+// Constants
+import { BASE_URL } from "./constants";
+
 // Creating a socket connection with the server
 export const createSocketConnection = () => {
-  const socket = io("http://localhost:7777", {
-    transports: ["websocket"],
-  });
+  if (location.hostname === "localhost") {
+    const socket = io(BASE_URL);
 
-  return socket;
+    return socket;
+  } else {
+    return io("/", { path: "/api/socket.io" }); // for prod; devTinder.com/api/socket.io <--- this is the path
+  }
 };

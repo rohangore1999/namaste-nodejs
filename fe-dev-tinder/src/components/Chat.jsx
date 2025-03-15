@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from "react";
+import axios from "axios";
 import { useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
+
+// Constants
+import { BASE_URL } from "../utils/constants";
 
 // Utils
 import { createSocketConnection } from "../utils/socket";
@@ -15,8 +19,11 @@ const Chat = () => {
     // { id: 2, sender: "user", text: "You underestimate my power!" },
   ]);
   const [newMessage, setNewMessage] = useState("");
+  const [targetUserName, setTargetUserName] = useState("");
 
   const userId = user?._id;
+
+  console.log({ userId });
 
   const handleSendMessage = (e) => {
     e.preventDefault();
@@ -81,7 +88,36 @@ const Chat = () => {
     };
   }, [userId, targetUserId]);
 
-  console.log({ messages });
+  useEffect(() => {
+    (async () => {
+      if (!userId) return;
+
+      try {
+        // fetching the chat
+        const response = await axios.get(`${BASE_URL}/chats/${targetUserId}`, {
+          withCredentials: true,
+        });
+
+        console.log({ response: response?.data });
+
+        setMessages(
+          response?.data?.messages.map((message) => ({
+            id: message._id,
+            sender: message?.senderId?._id === userId ? "user" : "receiver",
+            text: message?.text,
+          }))
+        );
+
+        const targetUserName = response?.data?.participants?.find(
+          (participant) => participant._id === targetUserId
+        );
+
+        setTargetUserName(targetUserName?.firstName + " " + targetUserName?.lastName);
+      } catch (error) {
+        console.log({ error });
+      }
+    })();
+  }, [userId]);
 
   return (
     <div className="flex justify-center h-screen bg-gray-900 p-5">
@@ -95,14 +131,14 @@ const Chat = () => {
             {targetUserId?.charAt(0)?.toUpperCase() || "U"}
           </div>
           <div>
-            <h2 className="font-bold text-lg">Chat with {targetUserId || "User"}</h2>
+            <h2 className="font-bold text-lg">Chat with {targetUserName || "User"}</h2>
             <p className="text-xs text-purple-400">Online</p>
           </div>
         </div>
 
         {/* Messages container */}
         <div className="flex-1 p-4 overflow-y-auto bg-gray-800">
-          {messages.map((message) => (
+          {messages?.map((message) => (
             <div
               key={message.id}
               className={`chat ${message.sender === "user" ? "chat-end" : "chat-start"} mb-4`}
